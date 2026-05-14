@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deep Research Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{--bg:#0f0f11;--surface:#18181c;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);--text:#f0eff4;--muted:#888794;--hint:#4a4857;--accent:#7c6fff;--green:#3ecf8e;--amber:#f5a623;--coral:#ff6b6b;--radius:14px;--radius-sm:8px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:80px;}
+  header{border-bottom:1px solid var(--border);padding:28px 40px 24px;display:flex;align-items:center;gap:16px;}
+  .logo-ring{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:18px;}
+  header h1{font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;}
+  header p{font-size:13px;color:var(--muted);margin-top:2px;}
+  main{max-width:860px;margin:0 auto;padding:48px 24px 0;}
+  .hero{text-align:center;margin-bottom:48px;}
+  .hero h2{font-family:'DM Serif Display',serif;font-size:38px;font-weight:400;line-height:1.15;letter-spacing:-0.02em;margin-bottom:14px;}
+  .hero p{font-size:15px;color:var(--muted);line-height:1.7;max-width:480px;margin:0 auto;}
+  .query-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:20px;margin-bottom:40px;}
+  .query-box textarea{width:100%;background:transparent;border:none;outline:none;resize:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.65;min-height:72px;}
+  .query-box textarea::placeholder{color:var(--hint);}
+  .query-footer{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+  .agent-pills{display:flex;gap:6px;flex-wrap:wrap;}
+  .pill{font-size:11px;padding:3px 10px;border-radius:99px;border:1px solid var(--border2);color:var(--muted);}
+  .btn-run{padding:10px 26px;background:var(--accent);color:#fff;border:none;border-radius:99px;font-size:14px;font-weight:500;cursor:pointer;transition:opacity 0.2s,transform 0.1s;}
+  .btn-run:hover{opacity:0.88;}
+  .btn-run:active{transform:scale(0.97);}
+  .btn-run:disabled{opacity:0.4;cursor:not-allowed;}
+  .agents-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:24px;}
+  .agent-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;min-height:180px;transition:border-color 0.3s;}
+  .agent-card.active{border-color:var(--border2);}
+  .agent-top{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .agent-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+  .agent-name{font-size:13px;font-weight:500;}
+  .agent-role{font-size:11px;color:var(--muted);margin-top:1px;}
+  .agent-chip{font-size:10px;padding:2px 8px;border-radius:99px;border:1px solid var(--border);color:var(--muted);transition:all 0.3s;margin-left:auto;}
+  .agent-chip.running{color:var(--amber);border-color:rgba(245,166,35,0.4);}
+  .agent-chip.done{color:var(--green);border-color:rgba(62,207,142,0.4);}
+  .agent-answer{font-size:13px;color:var(--muted);line-height:1.7;}
+  .agent-answer.placeholder{color:var(--hint);font-style:italic;}
+  .dots{display:flex;gap:4px;align-items:center;margin-top:4px;}
+  .dot{width:5px;height:5px;border-radius:50%;background:var(--amber);animation:blink 1.2s infinite;}
+  .dot:nth-child(2){animation-delay:0.2s;}
+  .dot:nth-child(3){animation-delay:0.4s;}
+  @keyframes blink{0%,80%,100%{opacity:0.15;}40%{opacity:1;}}
+  .synthesis{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;display:none;animation:fadeUp 0.4s ease;}
+  .synthesis.visible{display:block;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+  .synthesis-label{font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+  .synthesis-label::before{content:'';display:block;width:6px;height:6px;border-radius:50%;background:var(--accent);}
+  .synthesis-text{font-size:15px;color:var(--text);line-height:1.8;}
+  .error-bar{background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.25);border-radius:var(--radius-sm);padding:12px 16px;font-size:13px;color:var(--coral);margin-bottom:20px;display:none;}
+  .error-bar.visible{display:block;}
+  .page-footer{text-align:center;margin-top:60px;font-size:12px;color:var(--hint);}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo-ring">✦</div>
+  <div>
+    <h1>Deep Research Panel</h1>
+    <p>4 AI agents · any question · one clear answer</p>
+  </div>
+</header>
+<main>
+  <div class="hero">
+    <h2>Ask anything.<br>Get every angle.</h2>
+    <p>Four specialist AI agents research your question in parallel, then synthesize the best possible answer in plain language.</p>
+  </div>
+  <div class="error-bar" id="errorBar"></div>
+  <div class="query-box">
+    <textarea id="queryInput" placeholder="Type your question here — e.g. How does solar energy work? What is inflation?" rows="3"></textarea>
+    <div class="query-footer">
+      <div class="agent-pills">
+        <span class="pill">Analyst</span>
+        <span class="pill">Researcher</span>
+        <span class="pill">Critic</span>
+        <span class="pill">Advisor</span>
+      </div>
+      <button class="btn-run" id="runBtn" onclick="runAgents()">Run agents →</button>
+    </div>
+  </div>
+  <div class="agents-grid">
+    <div class="agent-card" id="card-0">
+      <div class="agent-top">
+        <div class="agent-avatar" style="background:rgba(124,111,255,0.15);color:#9b8fff;">🔍</div>
+        <div><div class="agent-name">Analyst</div><div class="agent-role">Core concepts & facts</div></div>
+        <span class="agent-chip" id="chip-0">idle</span>
+      </div>
+      <div class="agent-answer placeholder" id="ans-0">Waiting for your question...</div>
+    </div>
+    <div class="agent-card" id="card-1">
+      <div class="agent-top">
+        <div class="agent-avatar" style="background:rgba(56,189,248,0.15);color:#5cc8f8;">📚</div>
+        <div><div class="agent-name">Researcher</div><div class="agent-role">Evidence & real examples</div></div>
+        <span class="agent-chip" id="chip-1">idle</span>
+      </div>
+      <div class="agent-answer placeholder" id="ans-1">Waiting for your question...</div>
+    </div>
+    <div class="agent-card" id="card-2">
+      <div class="agent-top">
+        <div class="agent-avatar" style="background:rgba(245,166,35,0.15);color:#f5a623;">⚠️</div>
+        <div><div class="agent-name">Critic</div><div class="agent-role">Risks & limitations</div></div>
+        <span class="agent-chip" id="chip-2">idle</span>
+      </div>
+      <div class="agent-answer placeholder" id="ans-2">Waiting for your question...</div>
+    </div>
+    <div class="agent-card" id="card-3">
+      <div class="agent-top">
+        <div class="agent-avatar" style="background:rgba(62,207,142,0.15);color:#3ecf8e;">🧭</div>
+        <div><div class="agent-name">Advisor</div><div class="agent-role">Practical next steps</div></div>
+        <span class="agent-chip" id="chip-3">idle</span>
+      </div>
+      <div class="agent-answer placeholder" id="ans-3">Waiting for your question...</div>
+    </div>
+  </div>
+  <div class="synthesis" id="synthesis">
+    <div class="synthesis-label">Synthesized answer</div>
+    <div class="synthesis-text" id="synthesisText"></div>
+  </div>
+  <div class="page-footer">Powered by Claude · No API key needed · Just ask</div>
+</main>
+<script>
+const AGENTS=[
+  {prompt:q=>`You are the Analyst agent. In 2-3 clear sentences, explain the core concepts and key facts about: "${q}". Use simple everyday language for a non-technical reader.`},
+  {prompt:q=>`You are the Researcher agent. In 2-3 sentences, give a concrete real-world example or evidence that illustrates: "${q}". Keep it vivid and simple.`},
+  {prompt:q=>`You are the Critic agent. In 2-3 sentences, identify the main risks, limitations, or caveats about: "${q}". Be honest and plain-spoken.`},
+  {prompt:q=>`You are the Advisor agent. In 2-3 sentences, give practical actionable steps a non-technical person should take when dealing with: "${q}". Be encouraging and specific.`}
+];
+function setCard(i,state,text){
+  const chip=document.getElementById('chip-'+i),ans=document.getElementById('ans-'+i),card=document.getElementById('card-'+i);
+  chip.className='agent-chip '+state;
+  chip.textContent=state==='running'?'thinking...':state==='done'?'done ✓':'idle';
+  card.className='agent-card '+(state!=='idle'?'active':'');
+  if(state==='running'){ans.className='agent-answer';ans.innerHTML='<div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';}
+  else if(state==='done'){ans.className='agent-answer';ans.textContent=text;}
+  else{ans.className='agent-answer placeholder';ans.textContent='Waiting for your question...';}
+}
+async function ask(prompt){
+  const res=await fetch('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
+  const data=await res.json();
+  if(!res.ok)throw new Error(data.error||'Server error');
+  return data.text;
+}
+async function runAgents(){
+  const q=document.getElementById('queryInput').value.trim();
+  if(!q){document.getElementById('queryInput').focus();return;}
+  document.getElementById('errorBar').className='error-bar';
+  document.getElementById('runBtn').disabled=true;
+  document.getElementById('runBtn').textContent='Running...';
+  document.getElementById('synthesis').className='synthesis';
+  for(let i=0;i<4;i++)setCard(i,'running','');
+  try{
+    const results=await Promise.all(AGENTS.map((a,i)=>ask(a.prompt(q)).then(t=>{setCard(i,'done',t);return t;})));
+    document.getElementById('synthesis').className='synthesis visible';
+    document.getElementById('synthesisText').textContent='Synthesizing...';
+    const final=await ask(`A user asked: "${q}"\n\nAnalyst: ${results[0]}\nResearcher: ${results[1]}\nCritic: ${results[2]}\nAdvisor: ${results[3]}\n\nSynthesize into one clear helpful answer (4-5 sentences) for a non-technical person. Do not mention the agents.`);
+    document.getElementById('synthesisText').textContent=final;
+  }catch(err){
+    const bar=document.getElementById('errorBar');bar.className='error-bar visible';bar.textContent='Error: '+err.message;
+    for(let i=0;i<4;i++)setCard(i,'idle','');
+  }
+  document.getElementById('runBtn').disabled=false;
+  document.getElementById('runBtn').textContent='Run agents →';
+}
+document.getElementById('queryInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();runAgents();}});
+</script>
+</body>
+</html>
